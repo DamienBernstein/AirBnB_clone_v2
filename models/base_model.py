@@ -1,86 +1,83 @@
-#!/usr/bin/python3
-"""DB storage
+
+   #!/usr/bin/python3
 """
+    Module containing BaseModel
+"""
+from uuid import uuid4
+from datetime import datetime
 import models
-from models import city, state
-from os import environ, getenv
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from os import environ
+
+storage_engine = environ.get("HBNB_TYPE_STORAGE")
+
+if (storage_engine == "db"):
+    Base = declarative_base()
+else:
+    Base = object
 
 
-HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
-HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
-HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
-HBNB_MYSQL_DB = getenv('HBNB_MYSQL_DB')
-
-
-class DBStorage:
-    """database storage for mysql conversion
+class BaseModel():
     """
-    __engine = None
-    __session = None
+        Base class to define all common attributes and methods for
+        other classes
+    """
+    id = Column(String(60), primary_key=True, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
 
-    def __init__(self):
-        """initializer for DBStorage"""
-        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
-                                      format(HBNB_MYSQL_USER,
-                                             HBNB_MYSQL_PWD,
-                                             HBNB_MYSQL_HOST,
-                                             HBNB_MYSQL_DB),
-                                      pool_pre_ping=True)
-        env = getenv("HBNB_ENV")
-        if env == "test":
-            Base.metadata.drop_all(self.__engine)
-
-    def all(self, cls=None):
-        """Query the current session and list all instances of cls
+    def __init__(self, *args, **kwargs):
         """
-        result = {}
-        if cls:
-            for row in self.__session.query(cls).all():
-                key = "{}.{}".format(cls.__name__, row.id)
-                row.to_dict()
-                result.update({key: row})
+            initialization of BaseModel
+        """
+        if kwargs:
+            for key in kwargs:
+                if key == "__class__":
+                    continue
+                elif key in ("created_at", "updated_at"):
+                    iso = "%Y-%m-%dT%H:%M:%S.%f"
+                    setattr(self, key, datetime.strptime(kwargs[key], iso))
+                else:
+                    setattr(self, key, kwargs[key])
+                self.id = str(uuid4())
         else:
-            for table in models.dummy_tables:
-                cls = models.dummy_tables[table]
-                for row in self.__session.query(cls).all():
-                    key = "{}.{}".format(cls.__name__, row.id)
-                    row.to_dict()
-                    result.update({key: row})
-        return result
+            self.id = str(uuid4())
+            self.created_at = self.updated_at = datetime.now()
 
-    def rollback(self):
-        """rollback changes
+    def __str__(self):
         """
-        self.__session.rollback()
-
-    def new(self, obj):
-        """add object to current session
+            return string representation of a Model
         """
-        self.__session.add(obj)
+        return "[{}] ({}) {}".format(self.__class__.__name__,
+                                     self.id, self.__dict__)
 
     def save(self):
-        """commit current done work
         """
-        self.__session.commit()
+            update latest updation time of a model
+        """
+        self.updated_at = datetime.now()
+        models.storage.new(self)
+        models.storage.save()
 
-    def delete(self, obj=None):
-        """delete obj from session
+    def to_dict(self):
         """
-        if obj is not None:
-            self.__session.delete(obj)
+            custom representation of a model
+        """
+        custom = self.__dict__.copy()
+        custom_dict = {}
+        custom_dict.update({"__class__": self.__class__.__name__})
+        for key in list(custom):
+            if key in ("created_at", "updated_at"):
+                custom_dict.update({key: getattr(self, key).isoformat()})
+            elif key == "_sa_instance_state":
+                custom.pop(key)
+            else:
+                custom_dict.update({key: getattr(self, key)})
+        return custom_dict
 
-    def reload(self):
-        """reload the session
+    def delete(self):
+        """ delete the current instance from the storage
         """
-        Base.metadata.create_all(self.__engine)
-        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Scope = scoped_session(Session)
-        self.__session = Scope()
-
-    def close(self):
-        """display our HBNB data
-        """
-        self.__session.close()
-        self.reload()
+        k = "{}.{}".format(type(self).__name__, self.id)
+        del models.storage.__objects[k]
