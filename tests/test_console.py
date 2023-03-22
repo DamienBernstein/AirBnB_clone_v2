@@ -19,22 +19,22 @@ class HBNBCommand(cmd.Cmd):
         Implementation of the HBNB command line interpreter.
         """
 
-    def do_create(self, arg):
-        """
-        Creates a new instance of a class.
-        Usage: create <class_name>
-        """
-        args = arg.split()
-        if len(args) == 0:
-            print("** class name missing **")
-            return
-        class_name = args[0]
-        if class_name not in classes:
-            print("** class doesn't exist **")
-            return
-        obj = classes[class_name]()
-        obj.save()
-        print(obj.id)
+        def do_create(self, arg):
+            """
+            Creates a new instance of a class.
+            Usage: create <class_name>
+            """
+            args = arg.split()
+            if len(args) == 0:
+                print("** class name missing **")
+                return
+            class_name = args[0]
+            if class_name not in classes:
+                print("** class doesn't exist **")
+                return
+            obj = classes[class_name]()
+            obj.save()
+            print(obj.id)
 
 
 
