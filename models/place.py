@@ -19,15 +19,15 @@ class Place(BaseModel, Base):
     """
     __tablename__ = "places"
     city_id = Column(String(60), ForeignKey("cities.id"), nullable=False)
-    user_id: str = Column(String(60), ForeignKey("users.id"), nullable=False)
-    name: str = Column(String(128), nullable=False)
-    description: str = Column(String(1024), nullable=True)
-    number_rooms: int = Column(Integer, nullable=False, default=0)
-    number_bathrooms: int = Column(Integer, nullable=False, default=0)
-    max_guest: int = Column(Integer, nullable=False, default=0)
-    price_by_night: int = Column(Integer, nullable=False, default=0)
-    latitude: float = Column(Float, nullable=True)
-    longitude: float = Column(Float, nullable=True)
+    user_id = Column(String(60), ForeignKey("users.id"), nullable=False)
+    name = Column(String(128), nullable=False)
+    description = Column(String(1024), nullable=True)
+    number_rooms = Column(Integer, nullable=False, default=0)
+    number_bathrooms = Column(Integer, nullable=False, default=0)
+    max_guest = Column(Integer, nullable=False, default=0)
+    price_by_night = Column(Integer, nullable=False, default=0)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
     amenity_ids: List[str] = []
     reviews = relationship("Review", back_populates="place")
     amenities = relationship("Amenity",
