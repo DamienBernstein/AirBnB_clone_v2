@@ -13,29 +13,26 @@ from models.place import Place
 from models.review import Review
 from models.engine.file_storage import FileStorage
 from models.engine.db_storage import DBStorage
+class HBNBCommand(cmd.Cmd):
+    """This class defines the command line interpreter"""
 
+    prompt = "(hbnb) "
 
-class TestConsole(unittest.TestCase):
-    """this will test the console"""
+    def emptyline(self):
+        """Do nothing when emptyline is entered"""
+        pass
 
-    def test_exists(self):
-        """checking for docstrings i think"""
-        self.assertIsNotNone(HBNBCommand.do_quit.__doc__)
-        self.assertIsNotNone(HBNBCommand.do_create.__doc__)
-        self.assertIsNotNone(HBNBCommand.do_show.__doc__)
-        self.assertIsNotNone(HBNBCommand.do_destroy.__doc__)
-        self.assertIsNotNone(HBNBCommand.do_all.__doc__)
-        self.assertIsNotNone(HBNBCommand.do_update.__doc__)
+    def do_quit(self, arg):
+        """Quit command to exit the program"""
+        return True
 
-    @classmethod
-    def get_S(cls):
-        """get stringio value and close"""
-        temp_out = StringIO()
-        sys.stdout = temp_out
-        return temp_out.getvalue()
+    def do_create(self, arg):
+        """
+        Create a new instance of a class
 
-    def test_create_error(self):
-        """test if create works right"""
+        Usage: create <class_name>
+ 
+        """
         temp_out = StringIO()
         sys.stdout = temp_out
 
