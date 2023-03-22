@@ -13,36 +13,10 @@ from models.place import Place
 from models.review import Review
 from models.engine.file_storage import FileStorage
 from models.engine.db_storage import DBStorage
-import cmd
-
-
-class HBNBCommand(cmd.Cmd):
-        """
-        Implementation of the HBNB command line interpreter.
-        """
-
-        def do_create(self, arg):
-            """
-            Creates a new instance of a class.
-            Usage: create <class_name>
-            """
-            args = arg.split()
-            if len(args) == 0:
-                print("** class name missing **")
-                return
-            class_name = args[0]
-            if class_name not in classes:
-                print("** class doesn't exist **")
-                return
-            obj = classes[class_name]()
-            obj.save()
-            print(obj.id)
-
 
 
 class TestConsole(unittest.TestCase):
     """this will test the console"""
-    
 
     def test_exists(self):
         """checking for docstrings i think"""
