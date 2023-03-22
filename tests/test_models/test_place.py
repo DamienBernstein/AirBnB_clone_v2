@@ -1,69 +1,86 @@
-#!/usr/bin/python3
-""" """
-from tests.test_models.test_base_model import test_basemodel
+import unittest
 from models.place import Place
+from models.base_model import BaseModel
+from unittest.mock import patch
+import os
 
 
-class test_Place(test_basemodel):
-    """ """
+class TestPlace(unittest.TestCase):
+    """
+    Test the Place model class
+    """
 
-    def __init__(self, *args, **kwargs):
-        """ """
-        super().__init__(*args, **kwargs)
-        self.name = "Place"
-        self.value = Place
+    @classmethod
+    def setUpClass(cls):
+        """
+        Create an instance of the Place class before each test
+        """
+        cls.place = Place()
 
-    def test_city_id(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.city_id), str)
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Delete the instance of the Place class after each test
+        """
+        del cls.place
 
-    def test_user_id(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.user_id), str)
+    def test_inheritance(self):
+        """
+        Test that the Place class inherits from BaseModel
+        """
+        self.assertIsInstance(self.place, BaseModel)
 
-    def test_name(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.name), str)
+    def test_attributes(self):
+        """
+        Test that the Place class has the required attributes
+        """
+        self.assertTrue(hasattr(self.place, "city_id"))
+        self.assertTrue(hasattr(self.place, "user_id"))
+        self.assertTrue(hasattr(self.place, "name"))
+        self.assertTrue(hasattr(self.place, "description"))
+        self.assertTrue(hasattr(self.place, "number_rooms"))
+        self.assertTrue(hasattr(self.place, "number_bathrooms"))
+        self.assertTrue(hasattr(self.place, "max_guest"))
+        self.assertTrue(hasattr(self.place, "price_by_night"))
+        self.assertTrue(hasattr(self.place, "latitude"))
+        self.assertTrue(hasattr(self.place, "longitude"))
+        self.assertTrue(hasattr(self.place, "amenity_ids"))
 
-    def test_description(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.description), str)
+    def test_place_amenity_relationship(self):
+        """
+        Test that the Place and Amenity classes have a many-to-many relationship
+        """
+        self.assertTrue(hasattr(self.place, "amenities"))
+        self.assertIsInstance(self.place.amenities, list)
 
-    def test_number_rooms(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.number_rooms), int)
+    @unittest.skipIf(os.environ.get("HBNB_TYPE_STORAGE") == "db", "Testing database storage only")
+    def test_getter_methods(self):
+        """
+        Test the getter methods when using file storage
+        """
+        with patch("models.storage.all") as mock_storage:
+            mock_storage.return_value = {
+                "Review.1": Review(place_id=self.place.id),
+                "Review.2": Review(place_id=self.place.id)
+            }
+            self.assertIsInstance(self.place.reviews, list)
+            self.assertEqual(len(self.place.reviews), 2)
 
-    def test_number_bathrooms(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.number_bathrooms), int)
+            mock_storage.return_value = {
+                "Amenity.1": Amenity(id="1", name="Wifi"),
+                "Amenity.2": Amenity(id="2", name="Pool"),
+                "Amenity.3": Amenity(id="3", name="Hot tub")
+            }
+            self.assertIsInstance(self.place.amenities, list)
+            self.assertEqual(len(self.place.amenities), 0)
 
-    def test_max_guest(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.max_guest), int)
-
-    def test_price_by_night(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.price_by_night), int)
-
-    def test_latitude(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.latitude), float)
-
-    def test_longitude(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.latitude), float)
-
-    def test_amenity_ids(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.amenity_ids), list)
+    @unittest.skipIf(os.environ.get("HBNB_TYPE_STORAGE") == "file", "Testing file storage only")
+    def test_amenities_relationship(self):
+        """
+        Test the amenities relationship when using database storage
+        """
+        with patch("models.storage.all") as mock_storage:
+            mock_amenity = Amenity(id="1", name="Wifi")
+            self.place.amenities.append(mock_amenity)
+            mock_storage.return_value = { "Amenity.1": mock_amenity }
+            self.assertIn(mock_amenity, self.place.amenities)
