@@ -19,6 +19,19 @@ if storage_engine == "db":
 
 class TestPlace(unittest.TestCase):
 
+    def test_place(self):
+        # Create a new Place object
+        place = Place()
+
+        # Set some values for the object
+        place.name = "My Place"
+        place.description = "A great place to stay!"
+
+        # Test that the values were set correctly
+        self.assertEqual(place.name, "My Place")
+        self.assertEqual(place.description, "A great place to stay!")
+
+
     def setUp(self):
         self.place = Place()
 
