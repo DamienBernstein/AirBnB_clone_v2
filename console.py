@@ -33,7 +33,7 @@ class HBNBCommand(cmd.Cmd):
         """Ignore empty inputs"""
         pass
 
-   def do_create(self, arg):
+    def do_create(self, arg):
         if arg is None:
             print("** class name missing **")
             return
