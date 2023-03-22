@@ -34,45 +34,24 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, arg):
-        """Creates a new instance of a Model"""
-        if arg:
-            try:
-                args = arg.split()
-                template = models.dummy_classes[args[0]]
-                new_instance = template()
-                try:
-                    for pair in args[1:]:
-                        pair_split = pair.split("=")
-                        if (hasattr(new_instance, pair_split[0])):
-                            value = pair_split[1]
-                            flag = 0
-                            if (value.startswith('"')):
-                                value = value.strip('"')
-                                value = value.replace("\\", "")
-                                value = value.replace("_", " ")
-                            elif ("." in value):
-                                try:
-                                    value = float(value)
-                                except:
-                                    flag = 1
-                            else:
-                                try:
-                                    value = int(value)
-                                except:
-                                    flag = 1
-                            if (not flag):
-                                setattr(new_instance, pair_split[0], value)
-                        else:
-                            continue
-                    new_instance.save()
-                    print(new_instance.id)
-                except:
-                    new_instance.rollback()
-            except:
-                print("** class doesn't exist **")
-                models.storage.rollback()
-        else:
+        """
+        Creates a new instance of a class and saves it to the JSON file
+        """
+        args = arg.split()
+        if len(args) == 0:
             print("** class name missing **")
+            return
+        elif args[0] not in models.dummy_classes:
+            print("** class doesn't exist **")
+            return
+        try:
+            new_obj = models.dummy_classes[args[0]]()
+            new_obj.save()
+            print(new_obj.id)
+        except:
+            print("** failed to create instance **")
+            models.storage.reload()
+
 
     def do_show(self, arg):
         """string representation of an instance"""
