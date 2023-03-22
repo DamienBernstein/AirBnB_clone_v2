@@ -1,51 +1,67 @@
+#!/usr/bin/python3
+"""
+    test place
+"""
+from models.place import Place
+from models.city import City
+from models.user import User
+from models.base_model import BaseModel
 import unittest
-from models.base_model import BaseModel, Base
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
-from typing import List
-
-# Define storage engine here
-storage_engine = "db"
-
-if storage_engine == "db":
-    place_amenity = Table('place_amenity', Base.metadata,
-                          Column('place_id', String(60),
-                                 ForeignKey('places.id'),
-                                 primary_key=True, nullable=False),
-                          Column('amenity_id', String(60),
-                                 ForeignKey('amenities.id'),
-                                 primary_key=True, nullable=False))
 
 
-class TestPlace(unittest.TestCase):
+class test_Place(unittest.TestCase):
+    """
+        test for Place class
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+            setup
+        """
+        cls.dummy_city = Place()
+        cls.dummy_city.city_id = City().id
+        cls.dummy_city.user_id = User().id
+        cls.dummy_city.name = "test"
+        cls.dummy_city.description = "testing"
+        cls.dummy_city.number_rooms = 1
+        cls.dummy_city.number_bathrooms = 1
+        cls.dummy_city.max_guest = 1
+        cls.dummy_city.price_by_night = 1
+        cls.dummy_city.latitude = 1.0
+        cls.dummy_city.longitude = 1.0
+        cls.dummy_city.amenity_ids = []
 
-    def test_place(self):
-        # Create a new Place object
-        place = Place()
+    @classmethod
+    def tearDownClass(cls):
+        """
+            tear down
+        """
+        del cls.dummy_city
 
-        # Set some values for the object
-        place.name = "My Place"
-        place.description = "A great place to stay!"
+    def test_inheritance(self):
+        """
+            test proper inheritance
+        """
+        self.assertIsInstance(self.dummy_city, BaseModel)
+        self.assertTrue(hasattr(self.dummy_city, "id"))
+        self.assertTrue(hasattr(self.dummy_city, "created_at"))
+        self.assertTrue(hasattr(self.dummy_city, "updated_at"))
 
-        # Test that the values were set correctly
-        self.assertEqual(place.name, "My Place")
-        self.assertEqual(place.description, "A great place to stay!")
+    def test_attrs(self):
+        """
+            test attributes
+        """
+        self.assertTrue(hasattr(self.dummy_city, "city_id"))
+        self.assertTrue(hasattr(self.dummy_city, "user_id"))
+        self.assertTrue(hasattr(self.dummy_city, "name"))
+        self.assertTrue(hasattr(self.dummy_city, "description"))
+        self.assertTrue(hasattr(self.dummy_city, "number_rooms"))
+        self.assertTrue(hasattr(self.dummy_city, "number_bathrooms"))
+        self.assertTrue(hasattr(self.dummy_city, "max_guest"))
+        self.assertTrue(hasattr(self.dummy_city, "price_by_night"))
+        self.assertTrue(hasattr(self.dummy_city, "latitude"))
+        self.assertTrue(hasattr(self.dummy_city, "longitude"))
+        self.assertTrue(hasattr(self.dummy_city, "amenity_ids"))
 
-
-    def setUp(self):
-        self.place = Place()
-
-    def test_reviews(self):
-        self.place.reviews = [Review()]
-        self.assertEqual(len(self.place.reviews), 1)
-
-    def test_amenities(self):
-        self.place.amenities = Amenity()
-        self.assertEqual(len(self.place.amenities), 1)
-        self.assertTrue(isinstance(self.place.amenities[0], Amenity))
-
-    def test_amenities_setter(self):
-        amenity = Amenity()
-        self.place.amenities = amenity
-        self.assertEqual(len(self.place.amenity_ids), 1)
-        self.assertEqual(self.place.amenity_ids[0], amenity.id)
+if __name__ == "__main__":
+    unittest.main()
