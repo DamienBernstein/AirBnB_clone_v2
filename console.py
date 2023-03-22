@@ -33,11 +33,12 @@ class HBNBCommand(cmd.Cmd):
         """Ignore empty inputs"""
         pass
 
-    def do_create(self, arg):
-        """
-        Creates a new instance of a class and saves it to the JSON file
-        """
+   def do_create(self, arg):
+        if arg is None:
+            print("** class name missing **")
+            return
         args = arg.split()
+        
         if len(args) == 0:
             print("** class name missing **")
             return
