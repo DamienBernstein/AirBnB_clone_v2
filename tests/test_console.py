@@ -34,6 +34,16 @@ class TestConsole(unittest.TestCase):
         temp_out = StringIO()
         sys.stdout = temp_out
         return temp_out.getvalue()
+    
+    def test_create_error(self):
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().do_create('')
+            self.assertEqual(f.getvalue(), "** class name missing **\n")
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().do_create(None)
+            self.assertEqual(f.getvalue(), "** class name missing **\n")
+
 
     def test_create_error(self):
         """test if create works right"""
