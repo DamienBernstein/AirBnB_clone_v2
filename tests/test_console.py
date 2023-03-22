@@ -5,6 +5,7 @@ import unittest
 from io import StringIO
 from console import HBNBCommand
 import sys
+from unittest.mock import patch
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
